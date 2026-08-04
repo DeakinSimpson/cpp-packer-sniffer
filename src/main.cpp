@@ -8,9 +8,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 const std::string FILE_LOCATION = "test/pcap/test-data.pcap";
 static void ReadAllBytes(std::string filename, std::vector<char>& results);
+static std::string HexToString(std::vector<char> hex, int const hex_length);
 
 int main()
 {
@@ -21,7 +24,7 @@ int main()
     std::vector<char> bytes;
     ReadAllBytes(FILE_LOCATION, bytes);
 
-    std::cout << "first byte: " << bytes[0] << std::endl;
+    std::cout << HexToString(bytes, 4) << std::endl;
 
     // reader pcap header
 
@@ -59,4 +62,14 @@ static void ReadAllBytes(std::string filename, std::vector<char>& results)
 
     // read from the beging to the end
     ifs.read(&results[0], pos);
+}
+
+static std::string HexToString(std::vector<char> hex, int const hex_length)
+{
+    for (int i = 0; i < hex_length; ++i)
+    {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int) static_cast <unsigned char>(hex[i]) << ' ';
+    }
+
+    return "";
 }
