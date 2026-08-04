@@ -7,31 +7,21 @@
 #include <pcap.h>
 #include <fstream>
 #include <string>
+#include <vector>
 
 const std::string FILE_LOCATION = "test/pcap/test-data.pcap";
+static void ReadAllBytes(std::string filename, std::vector<char>& results);
 
 int main()
 {
     std::cout << "Hello World!" << std::endl;
 
-
-
-
     // TODO: open file into memory, then later implement more efficient method
-    // open file
-    std::ifstream file(FILE_LOCATION);
+    // read all bytes
+    std::vector<char> bytes;
+    ReadAllBytes(FILE_LOCATION, bytes);
 
-    // check if file opened succefully
-    if (!file.is_open())
-    {
-        std::cout << "Could not open file at: " << FILE_LOCATION << std::endl;
-        return 1;
-    }
-
-    std::cout << "read: "<< file.get() << std::endl;
-
-
-
+    std::cout << "first byte: " << bytes[0] << std::endl;
 
     // reader pcap header
 
@@ -42,4 +32,31 @@ int main()
 
     // original packet length
 
+}
+
+// a char is always 1 byte so we use char instead of BTYE
+static void ReadAllBytes(std::string filename, std::vector<char>& results)
+{
+    // open the file
+    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
+
+    // get the end position of the file
+    std::ifstream::pos_type pos = ifs.tellg();
+
+    // if the files end position is 0, close
+    if (pos == 0)
+    {
+        // set results to empty char vector
+        results = std::vector<char>{};
+        return;
+    }
+
+    // seeks the beginning of the file
+    ifs.seekg(0, std::ios::beg);
+
+    // resize results to be the size of the file
+    results.resize(pos);
+
+    // read from the beging to the end
+    ifs.read(&results[0], pos);
 }
