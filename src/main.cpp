@@ -66,10 +66,14 @@ static void ReadAllBytes(std::string filename, std::vector<char>& results)
 
 static std::string HexToString(std::vector<char> hex, int const hex_length)
 {
-    for (int i = 0; i < hex_length; ++i)
+    std::stringstream ss;
+
+    ss << "0x";
+        
+    for (int i = 1; i < hex_length + 1; ++i)
     {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int) static_cast <unsigned char>(hex[i]) << ' ';
+        ss << std::hex << std::setw(2) << std::setfill('0') << (int) static_cast <unsigned char>(hex[hex_length - i]);
     }
 
-    return "";
+    return ss.str();
 }
