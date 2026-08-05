@@ -11,9 +11,34 @@
 #include <sstream>
 #include <iomanip>
 
+struct PcapHeader {
+    uint32_t magicNumbers;
+    uint16_t majorVersion;
+    uint16_t minorVersion;
+    uint32_t reserved1;
+    uint32_t reserved2;
+    uint32_t network;
+};
+
+// a char is always 1 byte so we use char instead of BTYE
+static void ReadPcapHeader(const std::string& filename, PcapHeader& pcapHeader)
+{
+    // open the file
+    std::ifstream fs;
+    fs.open(filename, std::ifstream::binary);
+    if (!fs.good()) { return; }
+
+    fs.read(reinterpret_cast<char*>(&pcapHeader.magicNumbers), sizeof(pcapHeader.magicNumbers));
+    fs.read(reinterpret_cast<char*>(&pcapHeader.majorVersion), sizeof(pcapHeader.majorVersion));
+    fs.read(reinterpret_cast<char*>(&pcapHeader.minorVersion), sizeof(pcapHeader.minorVersion));
+    fs.read(reinterpret_cast<char*>(&pcapHeader.reserved1), sizeof(pcapHeader.reserved1));
+    fs.read(reinterpret_cast<char*>(&pcapHeader.reserved2), sizeof(pcapHeader.reserved2));
+    fs.read(reinterpret_cast<char*>(&pcapHeader.network), sizeof(pcapHeader.network));
+
+    fs.close();
+}
+
 const std::string FILE_LOCATION = "test/pcap/test-data.pcap";
-static void ReadAllBytes(std::string filename, std::vector<char>& results);
-static std::string HexToString(std::vector<char> hex, int const hex_length);
 
 int main()
 {
@@ -21,12 +46,13 @@ int main()
 
     // TODO: open file into memory, then later implement more efficient method
     // read all bytes
-    std::vector<char> bytes;
-    ReadAllBytes(FILE_LOCATION, bytes);
+    PcapHeader pcapHeader;
 
-    std::cout << HexToString(bytes, 4) << std::endl;
+    ReadPcapHeader(FILE_LOCATION, pcapHeader);
 
+    std::cout << pcapHeader.magicNumbers << std::endl;
     // reader pcap header
+
 
     // ts seconds
     // ts microseconds
@@ -35,45 +61,4 @@ int main()
 
     // original packet length
 
-}
-
-// a char is always 1 byte so we use char instead of BTYE
-static void ReadAllBytes(std::string filename, std::vector<char>& results)
-{
-    // open the file
-    std::ifstream ifs(filename, std::ios::binary|std::ios::ate);
-
-    // get the end position of the file
-    std::ifstream::pos_type pos = ifs.tellg();
-
-    // if the files end position is 0, close
-    if (pos == 0)
-    {
-        // set results to empty char vector
-        results = std::vector<char>{};
-        return;
-    }
-
-    // seeks the beginning of the file
-    ifs.seekg(0, std::ios::beg);
-
-    // resize results to be the size of the file
-    results.resize(pos);
-
-    // read from the beging to the end
-    ifs.read(&results[0], pos);
-}
-
-static std::string HexToString(std::vector<char> hex, int const hex_length)
-{
-    std::stringstream ss;
-
-    ss << "0x";
-        
-    for (int i = 1; i < hex_length + 1; ++i)
-    {
-        ss << std::hex << std::setw(2) << std::setfill('0') << (int) static_cast <unsigned char>(hex[hex_length - i]);
-    }
-
-    return ss.str();
 }
