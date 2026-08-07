@@ -4,12 +4,12 @@
 */
 
 #include <iostream>
-#include <pcap.h>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <cstdint>
 
 struct PcapHeader 
 {
@@ -21,12 +21,30 @@ struct PcapHeader
     uint32_t network;
 };
 
+struct EthernetHeader
+{
+
+};
+
+struct IPPacket
+{
+
+};
+
 struct Packet 
 {
+    // pcaps header
     uint32_t timestampSeconds;
     uint32_t timestampFraction;
     uint32_t capturePacketLength;
     uint32_t originalPacketLength;
+
+    // packet data
+    EthernetHeader EthernetHeader;
+    IPPacket ipPacket;
+
+    // integrity check
+    uint32_t ethernetFrameChecksum;
 };
 
 // a char is always 1 byte so we use char instead of BTYE
@@ -81,11 +99,12 @@ int main()
     ReadPcapHeader(&fs, pcapHeader);
 
     std::cout << pcapHeader.magicNumber << std::endl;
-    std::cout << GetPcapMagicType(&pcapHeader);
 
     // ts seconds
     // ts microseconds
     char timestampType = GetPcapMagicType(&pcapHeader);
+    std::cout << timestampType << std::endl;
+
 
     // get capture packet length
 
